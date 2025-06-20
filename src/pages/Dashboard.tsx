@@ -3,9 +3,12 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { useNavigate } from 'react-router-dom';
+import { Plus, Pizza, Users, BarChart } from 'lucide-react';
 
 export default function Dashboard() {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -102,20 +105,35 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 gap-4">
-                <Button className="h-16 flex flex-col items-center justify-center space-y-1">
-                  <span className="text-lg">📋</span>
+                <Button 
+                  onClick={() => navigate('/orders')} 
+                  className="h-16 flex flex-col items-center justify-center space-y-1"
+                >
+                  <Plus size={20} />
                   <span className="text-sm">Novo Pedido</span>
                 </Button>
-                <Button variant="outline" className="h-16 flex flex-col items-center justify-center space-y-1">
-                  <span className="text-lg">🍕</span>
+                <Button 
+                  onClick={() => navigate('/menu')} 
+                  variant="outline" 
+                  className="h-16 flex flex-col items-center justify-center space-y-1"
+                >
+                  <Pizza size={20} />
                   <span className="text-sm">Cardápio</span>
                 </Button>
-                <Button variant="outline" className="h-16 flex flex-col items-center justify-center space-y-1">
-                  <span className="text-lg">👥</span>
+                <Button 
+                  onClick={() => navigate('/customers')} 
+                  variant="outline" 
+                  className="h-16 flex flex-col items-center justify-center space-y-1"
+                >
+                  <Users size={20} />
                   <span className="text-sm">Clientes</span>
                 </Button>
-                <Button variant="outline" className="h-16 flex flex-col items-center justify-center space-y-1">
-                  <span className="text-lg">📊</span>
+                <Button 
+                  onClick={() => navigate('/reports')} 
+                  variant="outline" 
+                  className="h-16 flex flex-col items-center justify-center space-y-1"
+                >
+                  <BarChart size={20} />
                   <span className="text-sm">Relatórios</span>
                 </Button>
               </div>
