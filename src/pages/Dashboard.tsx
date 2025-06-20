@@ -1,0 +1,128 @@
+
+import { useAuth } from '@/contexts/AuthContext';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+
+export default function Dashboard() {
+  const { user, logout } = useAuth();
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <header className="bg-white shadow-sm border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center py-4">
+            <div className="flex items-center space-x-4">
+              <h1 className="text-2xl font-bold text-orange-600">🍕 Pizza Manager</h1>
+              {user?.tenantId && (
+                <Badge variant="secondary">Pizzaria: {user.name}</Badge>
+              )}
+            </div>
+            <div className="flex items-center space-x-4">
+              <span className="text-sm text-gray-600">Olá, {user?.name}</span>
+              <Button variant="outline" onClick={logout} size="sm">
+                Sair
+              </Button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg">Pedidos Hoje</CardTitle>
+              <CardDescription>Total de pedidos recebidos</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-green-600">24</div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg">Faturamento</CardTitle>
+              <CardDescription>Vendas do dia</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-blue-600">R$ 1.240,00</div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg">Pedidos Ativos</CardTitle>
+              <CardDescription>Em preparo ou entrega</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-orange-600">8</div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg">Produtos</CardTitle>
+              <CardDescription>Itens no cardápio</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-purple-600">45</div>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Pedidos Recentes</CardTitle>
+              <CardDescription>Últimos pedidos recebidos</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {[1, 2, 3, 4].map((order) => (
+                  <div key={order} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div>
+                      <p className="font-medium">Pedido #{String(order).padStart(4, '0')}</p>
+                      <p className="text-sm text-gray-600">Cliente: João Silva</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-medium text-green-600">R$ 45,90</p>
+                      <Badge variant="secondary" className="text-xs">Em preparo</Badge>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Ações Rápidas</CardTitle>
+              <CardDescription>Acessos mais utilizados</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 gap-4">
+                <Button className="h-16 flex flex-col items-center justify-center space-y-1">
+                  <span className="text-lg">📋</span>
+                  <span className="text-sm">Novo Pedido</span>
+                </Button>
+                <Button variant="outline" className="h-16 flex flex-col items-center justify-center space-y-1">
+                  <span className="text-lg">🍕</span>
+                  <span className="text-sm">Cardápio</span>
+                </Button>
+                <Button variant="outline" className="h-16 flex flex-col items-center justify-center space-y-1">
+                  <span className="text-lg">👥</span>
+                  <span className="text-sm">Clientes</span>
+                </Button>
+                <Button variant="outline" className="h-16 flex flex-col items-center justify-center space-y-1">
+                  <span className="text-lg">📊</span>
+                  <span className="text-sm">Relatórios</span>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </main>
+    </div>
+  );
+}
