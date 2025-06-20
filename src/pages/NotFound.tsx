@@ -1,27 +1,34 @@
-import { useLocation } from "react-router-dom";
-import { useEffect } from "react";
 
-const NotFound = () => {
-  const location = useLocation();
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useNavigate } from 'react-router-dom';
 
-  useEffect(() => {
-    console.error(
-      "404 Error: User attempted to access non-existent route:",
-      location.pathname
-    );
-  }, [location.pathname]);
+export default function NotFound() {
+  const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">404</h1>
-        <p className="text-xl text-gray-600 mb-4">Oops! Page not found</p>
-        <a href="/" className="text-blue-500 hover:text-blue-700 underline">
-          Return to Home
-        </a>
-      </div>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+      <Card className="w-full max-w-md">
+        <CardHeader className="text-center">
+          <CardTitle className="text-2xl font-bold text-gray-700">🍕 Página não encontrada</CardTitle>
+          <CardDescription>
+            A página que você está procurando não existe.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="text-center space-y-4">
+          <p className="text-sm text-gray-600">
+            Verifique o endereço ou volte para o início.
+          </p>
+          <div className="space-y-2">
+            <Button onClick={() => navigate('/dashboard')} className="w-full">
+              Ir para Dashboard
+            </Button>
+            <Button onClick={() => navigate('/')} variant="outline" className="w-full">
+              Página Inicial
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
-};
-
-export default NotFound;
+}
