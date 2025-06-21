@@ -106,7 +106,7 @@ export default function Dashboard() {
             <CardContent>
               <div className="grid grid-cols-2 gap-4">
                 <Button 
-                  onClick={() => navigate('/orders')} 
+                  onClick={() => navigate('/new-order')} 
                   className="h-16 flex flex-col items-center justify-center space-y-1"
                 >
                   <Plus size={20} />

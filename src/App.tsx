@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -9,8 +8,11 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
+import NewOrder from "./pages/NewOrder";
 import Menu from "./pages/Menu";
 import Orders from "./pages/Orders";
+import Customers from "./pages/Customers";
+import Reports from "./pages/Reports";
 import SuperAdmin from "./pages/SuperAdmin";
 import Unauthorized from "./pages/Unauthorized";
 import NotFound from "./pages/NotFound";
@@ -39,6 +41,15 @@ const App = () => (
             />
             
             <Route 
+              path="/new-order" 
+              element={
+                <ProtectedRoute>
+                  <NewOrder />
+                </ProtectedRoute>
+              } 
+            />
+            
+            <Route 
               path="/menu" 
               element={
                 <ProtectedRoute>
@@ -52,6 +63,24 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Orders />
+                </ProtectedRoute>
+              } 
+            />
+            
+            <Route 
+              path="/customers" 
+              element={
+                <ProtectedRoute>
+                  <Customers />
+                </ProtectedRoute>
+              } 
+            />
+            
+            <Route 
+              path="/reports" 
+              element={
+                <ProtectedRoute>
+                  <Reports />
                 </ProtectedRoute>
               } 
             />
