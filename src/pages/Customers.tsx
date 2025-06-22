@@ -1,63 +1,35 @@
-import { useState } from 'react';
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Customer } from '@/types';
 import Navbar from '@/components/Navbar';
 import CustomerModal from '@/components/CustomerModal';
+import { useOrders } from '@/contexts/OrderContext';
 
 export default function Customers() {
-  const [customers, setCustomers] = useState<Customer[]>([
-    {
-      id: '1',
-      tenantId: 'tenant-1',
-      name: 'João Silva',
-      phone: '(11) 99999-9999',
-      email: 'joao@email.com',
-      addresses: [
-        {
-          id: '1',
-          street: 'Rua das Flores, 123',
-          neighborhood: 'Centro',
-          city: 'São Paulo',
-          zipCode: '01234-567',
-          isDefault: true,
-        },
-      ],
-      createdAt: new Date().toISOString(),
-    },
-    {
-      id: '2',
-      tenantId: 'tenant-1',
-      name: 'Maria Santos',
-      phone: '(11) 88888-8888',
-      email: 'maria@email.com',
-      addresses: [
-        {
-          id: '2',
-          street: 'Av. Principal, 456',
-          neighborhood: 'Vila Nova',
-          city: 'São Paulo',
-          zipCode: '01234-890',
-          isDefault: true,
-        },
-      ],
-      createdAt: new Date(Date.now() - 86400000).toISOString(),
-    },
-  ]);
+  const { customers, updateCustomer, addCustomer, orders } = useOrders();
 
-  const handleCustomerSaved = (customer: Customer) => {
+  const handleCustomerSaved = (customer: any) => {
     const existingCustomerIndex = customers.findIndex(c => c.id === customer.id);
     
     if (existingCustomerIndex >= 0) {
-      // Editar cliente existente
-      const updatedCustomers = [...customers];
-      updatedCustomers[existingCustomerIndex] = customer;
-      setCustomers(updatedCustomers);
+      updateCustomer(customer);
     } else {
-      // Adicionar novo cliente
-      setCustomers([customer, ...customers]);
+      addCustomer(customer);
     }
+  };
+
+  const getCustomerOrdersCount = (customerId: string) => {
+    return orders.filter(order => order.customerId === customerId).length;
+  };
+
+  const getCustomerThisMonthOrders = (customerId: string) => {
+    const thisMonth = new Date();
+    thisMonth.setDate(1);
+    return orders.filter(order => 
+      order.customerId === customerId && 
+      new Date(order.createdAt) >= thisMonth
+    ).length;
   };
 
   return (
@@ -85,7 +57,7 @@ export default function Customers() {
           <Card>
             <CardContent className="p-4">
               <div className="text-center">
-                <div className="text-2xl font-bold text-green-600">8</div>
+                <div className="text-2xl font-bold text-green-600">{orders.length}</div>
                 <div className="text-sm text-gray-600">Pedidos Este Mês</div>
               </div>
             </CardContent>
@@ -93,7 +65,13 @@ export default function Customers() {
           <Card>
             <CardContent className="p-4">
               <div className="text-center">
-                <div className="text-2xl font-bold text-purple-600">3</div>
+                <div className="text-2xl font-bold text-purple-600">
+                  {customers.filter(c => {
+                    const weekAgo = new Date();
+                    weekAgo.setDate(weekAgo.getDate() - 7);
+                    return new Date(c.createdAt) >= weekAgo;
+                  }).length}
+                </div>
                 <div className="text-sm text-gray-600">Novos Esta Semana</div>
               </div>
             </CardContent>
@@ -123,6 +101,7 @@ export default function Customers() {
                       {customer.email && (
                         <p><strong>Email:</strong> {customer.email}</p>
                       )}
+                      <p><strong>Pedidos:</strong> {getCustomerOrdersCount(customer.id)} total</p>
                     </div>
                   </div>
 
@@ -144,7 +123,7 @@ export default function Customers() {
                 </div>
 
                 <div className="flex gap-2 mt-4">
-                  <Button size="sm">Ver Pedidos</Button>
+                  <Button size="sm">Ver Pedidos ({getCustomerThisMonthOrders(customer.id)})</Button>
                   <CustomerModal 
                     customer={customer}
                     onCustomerSaved={handleCustomerSaved}

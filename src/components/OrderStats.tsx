@@ -1,13 +1,18 @@
 
 import { Card, CardContent } from '@/components/ui/card';
+import { useOrders } from '@/contexts/OrderContext';
+import { useOrderStats } from '@/hooks/useOrderStats';
 
 export default function OrderStats() {
+  const { orders } = useOrders();
+  const stats = useOrderStats(orders);
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
       <Card>
         <CardContent className="p-4">
           <div className="text-center">
-            <div className="text-2xl font-bold text-yellow-600">3</div>
+            <div className="text-2xl font-bold text-yellow-600">{stats.pendingOrders}</div>
             <div className="text-sm text-gray-600">Pendentes</div>
           </div>
         </CardContent>
@@ -15,7 +20,7 @@ export default function OrderStats() {
       <Card>
         <CardContent className="p-4">
           <div className="text-center">
-            <div className="text-2xl font-bold text-blue-600">5</div>
+            <div className="text-2xl font-bold text-blue-600">{stats.preparingOrders}</div>
             <div className="text-sm text-gray-600">Em Preparo</div>
           </div>
         </CardContent>
@@ -23,7 +28,7 @@ export default function OrderStats() {
       <Card>
         <CardContent className="p-4">
           <div className="text-center">
-            <div className="text-2xl font-bold text-orange-600">2</div>
+            <div className="text-2xl font-bold text-orange-600">{stats.outForDeliveryOrders}</div>
             <div className="text-sm text-gray-600">Saindo</div>
           </div>
         </CardContent>
@@ -31,7 +36,7 @@ export default function OrderStats() {
       <Card>
         <CardContent className="p-4">
           <div className="text-center">
-            <div className="text-2xl font-bold text-green-600">15</div>
+            <div className="text-2xl font-bold text-green-600">{stats.deliveredTodayOrders}</div>
             <div className="text-sm text-gray-600">Entregues Hoje</div>
           </div>
         </CardContent>

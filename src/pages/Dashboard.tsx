@@ -1,14 +1,32 @@
-import { useAuth } from '@/contexts/AuthContext';
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useNavigate } from 'react-router-dom';
 import { Plus, Pizza, Users, BarChart } from 'lucide-react';
 import Navbar from '@/components/Navbar';
+import { useOrders } from '@/contexts/OrderContext';
+import { useOrderStats } from '@/hooks/useOrderStats';
 
 export default function Dashboard() {
-  const { user } = useAuth();
   const navigate = useNavigate();
+  const { orders } = useOrders();
+  const stats = useOrderStats(orders);
+
+  const recentOrders = orders
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    .slice(0, 4);
+
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case 'pending': return 'Pendente';
+      case 'preparing': return 'Em preparo';
+      case 'out_for_delivery': return 'Saiu para entrega';
+      case 'delivered': return 'Entregue';
+      case 'cancelled': return 'Cancelado';
+      default: return status;
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -22,7 +40,7 @@ export default function Dashboard() {
               <CardDescription>Total de pedidos recebidos</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-green-600">24</div>
+              <div className="text-3xl font-bold text-green-600">{stats.todayOrders}</div>
             </CardContent>
           </Card>
 
@@ -32,7 +50,9 @@ export default function Dashboard() {
               <CardDescription>Vendas do dia</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-blue-600">R$ 1.240,00</div>
+              <div className="text-3xl font-bold text-blue-600">
+                R$ {stats.todayRevenue.toFixed(2)}
+              </div>
             </CardContent>
           </Card>
 
@@ -42,17 +62,19 @@ export default function Dashboard() {
               <CardDescription>Em preparo ou entrega</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-orange-600">8</div>
+              <div className="text-3xl font-bold text-orange-600">{stats.activeOrders}</div>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-lg">Produtos</CardTitle>
-              <CardDescription>Itens no cardápio</CardDescription>
+              <CardTitle className="text-lg">Ticket Médio</CardTitle>
+              <CardDescription>Valor médio dos pedidos</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-purple-600">45</div>
+              <div className="text-3xl font-bold text-purple-600">
+                R$ {stats.averageTicket.toFixed(2)}
+              </div>
             </CardContent>
           </Card>
         </div>
@@ -65,15 +87,19 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {[1, 2, 3, 4].map((order) => (
-                  <div key={order} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                {recentOrders.map((order) => (
+                  <div key={order.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                     <div>
-                      <p className="font-medium">Pedido #{String(order).padStart(4, '0')}</p>
-                      <p className="text-sm text-gray-600">Cliente: João Silva</p>
+                      <p className="font-medium">Pedido #{order.id.padStart(4, '0')}</p>
+                      <p className="text-sm text-gray-600">
+                        {new Date(order.createdAt).toLocaleString('pt-BR')}
+                      </p>
                     </div>
                     <div className="text-right">
-                      <p className="font-medium text-green-600">R$ 45,90</p>
-                      <Badge variant="secondary" className="text-xs">Em preparo</Badge>
+                      <p className="font-medium text-green-600">R$ {order.total.toFixed(2)}</p>
+                      <Badge variant="secondary" className="text-xs">
+                        {getStatusText(order.status)}
+                      </Badge>
                     </div>
                   </div>
                 ))}
@@ -89,7 +115,7 @@ export default function Dashboard() {
             <CardContent>
               <div className="grid grid-cols-2 gap-4">
                 <Button 
-                  onClick={() => navigate('/new-order')} 
+                  onClick={() => navigate('/orders')} 
                   className="h-16 flex flex-col items-center justify-center space-y-1"
                 >
                   <Plus size={20} />

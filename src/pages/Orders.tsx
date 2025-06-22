@@ -1,69 +1,15 @@
-import { useState } from 'react';
-import { Order } from '@/types';
+
+import Navbar from '@/components/Navbar';
 import NewOrderModal from '@/components/NewOrderModal';
 import OrderCard from '@/components/OrderCard';
 import OrderStats from '@/components/OrderStats';
-import Navbar from '@/components/Navbar';
+import { useOrders } from '@/contexts/OrderContext';
 
 export default function Orders() {
-  const [orders, setOrders] = useState<Order[]>([
-    {
-      id: '1',
-      tenantId: 'tenant-1',
-      customerId: '1',
-      items: [
-        {
-          productId: '1',
-          productName: 'Pizza Margherita',
-          quantity: 1,
-          unitPrice: 35.90,
-          total: 35.90,
-        },
-        {
-          productId: '3',
-          productName: 'Coca-Cola 2L',
-          quantity: 2,
-          unitPrice: 8.90,
-          total: 17.80,
-        },
-      ],
-      total: 58.70,
-      status: 'preparing',
-      paymentMethod: 'PIX',
-      deliveryAddress: 'Rua das Flores, 123',
-      deliveryFee: 5.00,
-      createdAt: new Date().toISOString(),
-    },
-    {
-      id: '2',
-      tenantId: 'tenant-1',
-      customerId: '2',
-      items: [
-        {
-          productId: '2',
-          productName: 'Pizza Pepperoni',
-          quantity: 2,
-          unitPrice: 42.90,
-          total: 85.80,
-        },
-      ],
-      total: 90.80,
-      status: 'out_for_delivery',
-      paymentMethod: 'Cartão de Crédito',
-      deliveryAddress: 'Av. Principal, 456',
-      deliveryFee: 5.00,
-      createdAt: new Date(Date.now() - 3600000).toISOString(),
-    },
-  ]);
+  const { orders, updateOrderStatus, addOrder } = useOrders();
 
-  const updateOrderStatus = (orderId: string, newStatus: Order['status']) => {
-    setOrders(orders.map(order => 
-      order.id === orderId ? { ...order, status: newStatus } : order
-    ));
-  };
-
-  const handleOrderCreated = (newOrder: Order) => {
-    setOrders([newOrder, ...orders]);
+  const handleOrderCreated = (newOrder: any) => {
+    addOrder(newOrder);
   };
 
   return (

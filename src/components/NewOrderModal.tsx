@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Plus, Minus } from 'lucide-react';
 import { Order, Customer } from '@/types';
 import CustomerSearch from './CustomerSearch';
+import { useOrders } from '@/contexts/OrderContext';
 
 interface OrderItem {
   productId: string;
@@ -27,46 +28,8 @@ export default function NewOrderModal({ onOrderCreated, ordersCount }: NewOrderM
     address: '',
   });
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
-
-  // Mock de clientes (em uma aplicação real, viria do backend)
-  const customers: Customer[] = [
-    {
-      id: '1',
-      tenantId: 'tenant-1',
-      name: 'João Silva',
-      phone: '(11) 99999-9999',
-      email: 'joao@email.com',
-      addresses: [
-        {
-          id: '1',
-          street: 'Rua das Flores, 123',
-          neighborhood: 'Centro',
-          city: 'São Paulo',
-          zipCode: '01234-567',
-          isDefault: true,
-        },
-      ],
-      createdAt: new Date().toISOString(),
-    },
-    {
-      id: '2',
-      tenantId: 'tenant-1',
-      name: 'Maria Santos',
-      phone: '(11) 88888-8888',
-      email: 'maria@email.com',
-      addresses: [
-        {
-          id: '2',
-          street: 'Av. Principal, 456',
-          neighborhood: 'Vila Nova',
-          city: 'São Paulo',
-          zipCode: '01234-890',
-          isDefault: true,
-        },
-      ],
-      createdAt: new Date(Date.now() - 86400000).toISOString(),
-    },
-  ];
+  
+  const { customers } = useOrders();
 
   const handleCustomerSelected = (customer: Customer | null) => {
     setSelectedCustomer(customer);
@@ -162,6 +125,12 @@ export default function NewOrderModal({ onOrderCreated, ordersCount }: NewOrderM
       createdAt: new Date().toISOString(),
     };
 
+    console.log('Novo pedido:', {
+      customer: customerInfo,
+      items: orderItems,
+      total: getTotal()
+    });
+
     onOrderCreated(newOrder);
     setIsModalOpen(false);
     setOrderItems([]);
@@ -184,7 +153,6 @@ export default function NewOrderModal({ onOrderCreated, ordersCount }: NewOrderM
         </DialogHeader>
         
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Informações do Cliente */}
           <div className="space-y-4">
             <h3 className="font-semibold">Informações do Cliente</h3>
             
@@ -225,7 +193,6 @@ export default function NewOrderModal({ onOrderCreated, ordersCount }: NewOrderM
             </div>
           </div>
 
-          {/* Cardápio */}
           <div className="space-y-4">
             <h3 className="font-semibold">Cardápio</h3>
             <div className="space-y-3 max-h-60 overflow-y-auto">
@@ -247,7 +214,6 @@ export default function NewOrderModal({ onOrderCreated, ordersCount }: NewOrderM
             </div>
           </div>
 
-          {/* Itens do Pedido */}
           <div className="lg:col-span-2 space-y-4">
             <h3 className="font-semibold">Itens do Pedido</h3>
             {orderItems.length === 0 ? (
