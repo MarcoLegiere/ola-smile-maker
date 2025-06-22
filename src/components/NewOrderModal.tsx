@@ -1,10 +1,10 @@
-
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Plus, Minus } from 'lucide-react';
-import { Order } from '@/types';
+import { Order, Customer } from '@/types';
+import CustomerSearch from './CustomerSearch';
 
 interface OrderItem {
   productId: string;
@@ -26,6 +26,66 @@ export default function NewOrderModal({ onOrderCreated, ordersCount }: NewOrderM
     phone: '',
     address: '',
   });
+  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+
+  // Mock de clientes (em uma aplicação real, viria do backend)
+  const customers: Customer[] = [
+    {
+      id: '1',
+      tenantId: 'tenant-1',
+      name: 'João Silva',
+      phone: '(11) 99999-9999',
+      email: 'joao@email.com',
+      addresses: [
+        {
+          id: '1',
+          street: 'Rua das Flores, 123',
+          neighborhood: 'Centro',
+          city: 'São Paulo',
+          zipCode: '01234-567',
+          isDefault: true,
+        },
+      ],
+      createdAt: new Date().toISOString(),
+    },
+    {
+      id: '2',
+      tenantId: 'tenant-1',
+      name: 'Maria Santos',
+      phone: '(11) 88888-8888',
+      email: 'maria@email.com',
+      addresses: [
+        {
+          id: '2',
+          street: 'Av. Principal, 456',
+          neighborhood: 'Vila Nova',
+          city: 'São Paulo',
+          zipCode: '01234-890',
+          isDefault: true,
+        },
+      ],
+      createdAt: new Date(Date.now() - 86400000).toISOString(),
+    },
+  ];
+
+  const handleCustomerSelected = (customer: Customer | null) => {
+    setSelectedCustomer(customer);
+    if (customer) {
+      setCustomerInfo({
+        name: customer.name,
+        phone: customer.phone,
+        address: customer.addresses[0] ? 
+          `${customer.addresses[0].street}, ${customer.addresses[0].neighborhood}, ${customer.addresses[0].city}` : 
+          '',
+      });
+    } else {
+      setCustomerInfo({
+        name: '',
+        phone: '',
+        address: '',
+      });
+    }
+  };
 
   const menuItems = [
     { id: '1', name: 'Pizza Margherita', price: 35.90 },
@@ -86,7 +146,7 @@ export default function NewOrderModal({ onOrderCreated, ordersCount }: NewOrderM
     const newOrder: Order = {
       id: (ordersCount + 1).toString(),
       tenantId: 'tenant-1',
-      customerId: 'new-customer',
+      customerId: selectedCustomer?.id || 'new-customer',
       items: orderItems.map(item => ({
         productId: item.productId,
         productName: item.productName,
@@ -106,6 +166,7 @@ export default function NewOrderModal({ onOrderCreated, ordersCount }: NewOrderM
     setIsModalOpen(false);
     setOrderItems([]);
     setCustomerInfo({ name: '', phone: '', address: '' });
+    setSelectedCustomer(null);
     alert('Pedido criado com sucesso!');
   };
 
@@ -126,6 +187,12 @@ export default function NewOrderModal({ onOrderCreated, ordersCount }: NewOrderM
           {/* Informações do Cliente */}
           <div className="space-y-4">
             <h3 className="font-semibold">Informações do Cliente</h3>
+            
+            <CustomerSearch 
+              customers={customers}
+              onCustomerSelected={handleCustomerSelected}
+            />
+            
             <div>
               <label className="block text-sm font-medium mb-1">Nome</label>
               <input

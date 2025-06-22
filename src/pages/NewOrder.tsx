@@ -5,6 +5,8 @@ import { Badge } from '@/components/ui/badge';
 import { useNavigate } from 'react-router-dom';
 import { Plus, Minus } from 'lucide-react';
 import Navbar from '@/components/Navbar';
+import CustomerSearch from '@/components/CustomerSearch';
+import { Customer } from '@/types';
 
 interface OrderItem {
   productId: string;
@@ -21,6 +23,66 @@ export default function NewOrder() {
     phone: '',
     address: '',
   });
+  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+
+  // Mock de clientes (em uma aplicação real, viria do backend)
+  const customers: Customer[] = [
+    {
+      id: '1',
+      tenantId: 'tenant-1',
+      name: 'João Silva',
+      phone: '(11) 99999-9999',
+      email: 'joao@email.com',
+      addresses: [
+        {
+          id: '1',
+          street: 'Rua das Flores, 123',
+          neighborhood: 'Centro',
+          city: 'São Paulo',
+          zipCode: '01234-567',
+          isDefault: true,
+        },
+      ],
+      createdAt: new Date().toISOString(),
+    },
+    {
+      id: '2',
+      tenantId: 'tenant-1',
+      name: 'Maria Santos',
+      phone: '(11) 88888-8888',
+      email: 'maria@email.com',
+      addresses: [
+        {
+          id: '2',
+          street: 'Av. Principal, 456',
+          neighborhood: 'Vila Nova',
+          city: 'São Paulo',
+          zipCode: '01234-890',
+          isDefault: true,
+        },
+      ],
+      createdAt: new Date(Date.now() - 86400000).toISOString(),
+    },
+  ];
+
+  const handleCustomerSelected = (customer: Customer | null) => {
+    setSelectedCustomer(customer);
+    if (customer) {
+      setCustomerInfo({
+        name: customer.name,
+        phone: customer.phone,
+        address: customer.addresses[0] ? 
+          `${customer.addresses[0].street}, ${customer.addresses[0].neighborhood}, ${customer.addresses[0].city}` : 
+          '',
+      });
+    } else {
+      setCustomerInfo({
+        name: '',
+        phone: '',
+        address: '',
+      });
+    }
+  };
 
   const menuItems = [
     { id: '1', name: 'Pizza Margherita', price: 35.90 },
@@ -78,7 +140,6 @@ export default function NewOrder() {
       return;
     }
 
-    // Aqui você integraria com a API para salvar o pedido
     console.log('Novo pedido:', {
       customer: customerInfo,
       items: orderItems,
@@ -110,9 +171,14 @@ export default function NewOrder() {
           <Card>
             <CardHeader>
               <CardTitle>Informações do Cliente</CardTitle>
-              <CardDescription>Dados para entrega</CardDescription>
+              <CardDescription>Busque pelo telefone ou preencha manualmente</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
+              <CustomerSearch 
+                customers={customers}
+                onCustomerSelected={handleCustomerSelected}
+              />
+              
               <div>
                 <label className="block text-sm font-medium mb-1">Nome</label>
                 <input

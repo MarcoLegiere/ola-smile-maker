@@ -4,9 +4,10 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Customer } from '@/types';
 import Navbar from '@/components/Navbar';
+import CustomerModal from '@/components/CustomerModal';
 
 export default function Customers() {
-  const [customers] = useState<Customer[]>([
+  const [customers, setCustomers] = useState<Customer[]>([
     {
       id: '1',
       tenantId: 'tenant-1',
@@ -45,6 +46,20 @@ export default function Customers() {
     },
   ]);
 
+  const handleCustomerSaved = (customer: Customer) => {
+    const existingCustomerIndex = customers.findIndex(c => c.id === customer.id);
+    
+    if (existingCustomerIndex >= 0) {
+      // Editar cliente existente
+      const updatedCustomers = [...customers];
+      updatedCustomers[existingCustomerIndex] = customer;
+      setCustomers(updatedCustomers);
+    } else {
+      // Adicionar novo cliente
+      setCustomers([customer, ...customers]);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
@@ -52,7 +67,10 @@ export default function Customers() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex justify-between items-center mb-8">
           <h2 className="text-2xl font-bold text-gray-900">Gerenciar Clientes</h2>
-          <Button>+ Novo Cliente</Button>
+          <CustomerModal 
+            onCustomerSaved={handleCustomerSaved}
+            trigger={<Button>+ Novo Cliente</Button>}
+          />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
@@ -127,7 +145,11 @@ export default function Customers() {
 
                 <div className="flex gap-2 mt-4">
                   <Button size="sm">Ver Pedidos</Button>
-                  <Button variant="outline" size="sm">Editar</Button>
+                  <CustomerModal 
+                    customer={customer}
+                    onCustomerSaved={handleCustomerSaved}
+                    trigger={<Button variant="outline" size="sm">Editar</Button>}
+                  />
                   <Button variant="outline" size="sm">Histórico</Button>
                 </div>
               </CardContent>
