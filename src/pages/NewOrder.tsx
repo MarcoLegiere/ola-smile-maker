@@ -31,46 +31,6 @@ export default function NewOrder() {
   const [paymentMethod, setPaymentMethod] = useState<string>('pix');
   const [changeAmount, setChangeAmount] = useState<string>('');
 
-  // Mock de clientes (em uma aplicação real, viria do backend)
-  const customers: Customer[] = [
-    {
-      id: '1',
-      tenantId: 'tenant-1',
-      name: 'João Silva',
-      phone: '(11) 99999-9999',
-      email: 'joao@email.com',
-      addresses: [
-        {
-          id: '1',
-          street: 'Rua das Flores, 123',
-          neighborhood: 'Centro',
-          city: 'São Paulo',
-          zipCode: '01234-567',
-          isDefault: true,
-        },
-      ],
-      createdAt: new Date().toISOString(),
-    },
-    {
-      id: '2',
-      tenantId: 'tenant-1',
-      name: 'Maria Santos',
-      phone: '(11) 88888-8888',
-      email: 'maria@email.com',
-      addresses: [
-        {
-          id: '2',
-          street: 'Av. Principal, 456',
-          neighborhood: 'Vila Nova',
-          city: 'São Paulo',
-          zipCode: '01234-890',
-          isDefault: true,
-        },
-      ],
-      createdAt: new Date(Date.now() - 86400000).toISOString(),
-    },
-  ];
-
   const handleCustomerSelected = (customer: Customer | null) => {
     setSelectedCustomer(customer);
     if (customer) {
