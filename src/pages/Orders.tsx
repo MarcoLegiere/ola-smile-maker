@@ -1,9 +1,9 @@
-
 import { useState } from 'react';
 import { Order } from '@/types';
 import NewOrderModal from '@/components/NewOrderModal';
 import OrderCard from '@/components/OrderCard';
 import OrderStats from '@/components/OrderStats';
+import Navbar from '@/components/Navbar';
 
 export default function Orders() {
   const [orders, setOrders] = useState<Order[]>([
@@ -68,16 +68,14 @@ export default function Orders() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4">
-            <h1 className="text-2xl font-bold text-orange-600">📋 Gerenciar Pedidos</h1>
-            <NewOrderModal onOrderCreated={handleOrderCreated} ordersCount={orders.length} />
-          </div>
-        </div>
-      </header>
+      <Navbar />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="flex justify-between items-center mb-8">
+          <h2 className="text-2xl font-bold text-gray-900">Gerenciar Pedidos</h2>
+          <NewOrderModal onOrderCreated={handleOrderCreated} ordersCount={orders.length} />
+        </div>
+
         <OrderStats />
 
         <div className="space-y-4">

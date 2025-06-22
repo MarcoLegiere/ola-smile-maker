@@ -1,35 +1,18 @@
-
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useNavigate } from 'react-router-dom';
 import { Plus, Pizza, Users, BarChart } from 'lucide-react';
+import Navbar from '@/components/Navbar';
 
 export default function Dashboard() {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4">
-            <div className="flex items-center space-x-4">
-              <h1 className="text-2xl font-bold text-orange-600">🍕 Pizza Manager</h1>
-              {user?.tenantId && (
-                <Badge variant="secondary">Pizzaria: {user.name}</Badge>
-              )}
-            </div>
-            <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-600">Olá, {user?.name}</span>
-              <Button variant="outline" onClick={logout} size="sm">
-                Sair
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
+      <Navbar />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">

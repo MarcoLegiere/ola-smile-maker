@@ -1,10 +1,10 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Plus, Minus } from 'lucide-react';
+import { Plus, Minus } from 'lucide-react';
+import Navbar from '@/components/Navbar';
 
 interface OrderItem {
   productId: string;
@@ -91,32 +91,20 @@ export default function NewOrder() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4">
-            <div className="flex items-center space-x-4">
-              <Button
-                variant="ghost"
-                onClick={() => navigate('/dashboard')}
-                className="flex items-center space-x-2"
-              >
-                <ArrowLeft size={20} />
-                <span>Voltar</span>
-              </Button>
-              <h1 className="text-2xl font-bold text-orange-600">📋 Novo Pedido</h1>
-            </div>
-            <Button 
-              onClick={handleSubmitOrder}
-              disabled={orderItems.length === 0}
-              className="bg-green-600 hover:bg-green-700"
-            >
-              Finalizar Pedido
-            </Button>
-          </div>
-        </div>
-      </header>
+      <Navbar />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="flex justify-between items-center mb-8">
+          <h2 className="text-2xl font-bold text-gray-900">Novo Pedido</h2>
+          <Button 
+            onClick={handleSubmitOrder}
+            disabled={orderItems.length === 0}
+            className="bg-green-600 hover:bg-green-700"
+          >
+            Finalizar Pedido
+          </Button>
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Informações do Cliente */}
           <Card>
