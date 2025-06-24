@@ -65,6 +65,7 @@ export interface Order {
   deliveryAddress: string;
   createdAt: string;
   deliveryFee: number;
+  source: 'manual' | 'online';
 }
 
 export interface OrderItem {

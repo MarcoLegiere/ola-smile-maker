@@ -446,7 +446,7 @@ export default function NewOrder() {
                           {item.quantity}
                         </Badge>
                         <Button
-                          onClick={() => addItem({ id: item.productId, name: item.productName, price: item.price })}
+                          onClick={() => addItem({ id: item.productId, name: item.productName, price: item.price, category: 'Pizza' })}
                           size="sm"
                           variant="outline"
                           className="h-8 w-8 p-0"
