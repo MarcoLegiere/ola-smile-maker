@@ -19,12 +19,64 @@ export const useAuth = () => {
   return context;
 };
 
+// Usuários mockados para demonstração
+const mockUsers: User[] = [
+  {
+    id: '1',
+    email: 'admin@pizza.com',
+    name: 'Super Administrador',
+    role: 'super_admin',
+    isActive: true,
+    createdAt: '2024-01-01T00:00:00Z',
+    lastLogin: '2024-06-24T10:00:00Z',
+  },
+  {
+    id: '2',
+    email: 'bellavista@admin.com',
+    name: 'João Silva',
+    role: 'admin',
+    tenantId: 'tenant-1',
+    isActive: true,
+    createdAt: '2024-01-15T00:00:00Z',
+    lastLogin: '2024-06-23T18:30:00Z',
+  },
+  {
+    id: '3',
+    email: 'bellavista@atendente.com',
+    name: 'Maria Santos',
+    role: 'attendant',
+    tenantId: 'tenant-1',
+    isActive: true,
+    createdAt: '2024-02-01T00:00:00Z',
+    lastLogin: '2024-06-24T09:15:00Z',
+  },
+  {
+    id: '4',
+    email: 'express@admin.com',
+    name: 'Carlos Oliveira',
+    role: 'admin',
+    tenantId: 'tenant-2',
+    isActive: true,
+    createdAt: '2024-02-01T00:00:00Z',
+    lastLogin: '2024-06-20T16:45:00Z',
+  },
+  {
+    id: '5',
+    email: 'express@atendente.com',
+    name: 'Ana Costa',
+    role: 'attendant',
+    tenantId: 'tenant-2',
+    isActive: false,
+    createdAt: '2024-03-01T00:00:00Z',
+    lastLogin: '2024-06-10T14:20:00Z',
+  },
+];
+
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Simular verificação de token armazenado
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
       setUser(JSON.parse(storedUser));
@@ -33,26 +85,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const login = async (email: string, password: string) => {
-    // Simulação de login - em produção, integrar com Supabase
-    if (email === 'admin@pizza.com' && password === 'admin123') {
-      const mockUser: User = {
-        id: '1',
-        email,
-        name: 'Administrador',
-        role: 'super_admin',
+    // Simulação de login com múltiplos usuários
+    const foundUser = mockUsers.find(u => u.email === email);
+    
+    if (foundUser && password === 'admin123') {
+      // Atualizar último login
+      const updatedUser = { 
+        ...foundUser, 
+        lastLogin: new Date().toISOString() 
       };
-      setUser(mockUser);
-      localStorage.setItem('user', JSON.stringify(mockUser));
-    } else if (email === 'pizzaria@teste.com' && password === 'pizza123') {
-      const mockUser: User = {
-        id: '2',
-        email,
-        name: 'Pizzaria Teste',
-        role: 'admin',
-        tenantId: 'tenant-1',
-      };
-      setUser(mockUser);
-      localStorage.setItem('user', JSON.stringify(mockUser));
+      setUser(updatedUser);
+      localStorage.setItem('user', JSON.stringify(updatedUser));
     } else {
       throw new Error('Credenciais inválidas');
     }

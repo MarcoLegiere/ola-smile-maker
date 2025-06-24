@@ -22,7 +22,23 @@ export const ProtectedRoute = ({ children, requiredRole }: ProtectedRouteProps) 
     return <Navigate to="/login" replace />;
   }
 
-  if (requiredRole && user.role !== requiredRole && user.role !== 'super_admin') {
+  // Super admin tem acesso a tudo
+  if (user.role === 'super_admin') {
+    return <>{children}</>;
+  }
+
+  // Verifica se o usuário tem o papel necessário
+  if (requiredRole && user.role !== requiredRole) {
+    return <Navigate to="/unauthorized" replace />;
+  }
+
+  // Verifica se o usuário está ativo
+  if (!user.isActive) {
+    return <Navigate to="/unauthorized" replace />;
+  }
+
+  // Usuários admin e attendant devem ter um tenantId
+  if ((user.role === 'admin' || user.role === 'attendant') && !user.tenantId) {
     return <Navigate to="/unauthorized" replace />;
   }
 

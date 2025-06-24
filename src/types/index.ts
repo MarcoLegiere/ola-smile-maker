@@ -1,10 +1,12 @@
-
 export interface User {
   id: string;
   email: string;
   name: string;
   role: 'super_admin' | 'admin' | 'attendant';
   tenantId?: string;
+  isActive: boolean;
+  createdAt: string;
+  lastLogin?: string;
 }
 
 export interface Tenant {
@@ -17,6 +19,8 @@ export interface Tenant {
   isActive: boolean;
   settings: TenantSettings;
   createdAt: string;
+  usersCount?: number;
+  monthlyRevenue?: number;
 }
 
 export interface TenantSettings {
