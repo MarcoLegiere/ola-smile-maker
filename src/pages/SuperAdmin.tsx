@@ -6,13 +6,15 @@ import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tenant, User } from '@/types';
 import Navbar from '@/components/Navbar';
 import UserModal from '@/components/UserModal';
+import TenantModal from '@/components/TenantModal';
 import { Users, Building2, DollarSign, Activity, Search, Plus, Edit, Trash2 } from 'lucide-react';
 
 export default function SuperAdmin() {
-  const [tenants] = useState<Tenant[]>([
+  const [tenants, setTenants] = useState<Tenant[]>([
     {
       id: 'tenant-1',
       name: 'Pizzaria Bella Vista',
@@ -116,25 +118,38 @@ export default function SuperAdmin() {
   ]);
 
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedTenantFilter, setSelectedTenantFilter] = useState<string>('all');
   const [userModalOpen, setUserModalOpen] = useState(false);
+  const [tenantModalOpen, setTenantModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
+  const [selectedTenant, setSelectedTenant] = useState<Tenant | null>(null);
+  const [userModalMode, setUserModalMode] = useState<'create' | 'edit'>('create');
+  const [tenantModalMode, setTenantModalMode] = useState<'create' | 'edit'>('create');
 
+  // Handlers para usuários
   const handleCreateUser = () => {
     setSelectedUser(null);
-    setModalMode('create');
+    setUserModalMode('create');
     setUserModalOpen(true);
   };
 
   const handleEditUser = (user: User) => {
     setSelectedUser(user);
-    setModalMode('edit');
+    setUserModalMode('edit');
     setUserModalOpen(true);
   };
 
   const handleSaveUser = (userData: Partial<User>) => {
-    if (modalMode === 'create') {
+    if (userModalMode === 'create') {
       setUsers([...users, userData as User]);
+      // Atualizar contagem de usuários do tenant
+      if (userData.tenantId) {
+        setTenants(tenants.map(t => 
+          t.id === userData.tenantId 
+            ? { ...t, usersCount: (t.usersCount || 0) + 1 }
+            : t
+        ));
+      }
     } else {
       setUsers(users.map(u => u.id === userData.id ? { ...u, ...userData } : u));
     }
@@ -142,15 +157,60 @@ export default function SuperAdmin() {
 
   const handleDeleteUser = (userId: string) => {
     if (confirm('Tem certeza que deseja excluir este usuário?')) {
+      const userToDelete = users.find(u => u.id === userId);
       setUsers(users.filter(u => u.id !== userId));
+      // Atualizar contagem de usuários do tenant
+      if (userToDelete?.tenantId) {
+        setTenants(tenants.map(t => 
+          t.id === userToDelete.tenantId 
+            ? { ...t, usersCount: Math.max((t.usersCount || 0) - 1, 0) }
+            : t
+        ));
+      }
     }
   };
 
-  const filteredUsers = users.filter(user => 
-    user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    tenants.find(t => t.id === user.tenantId)?.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Handlers para estabelecimentos
+  const handleCreateTenant = () => {
+    setSelectedTenant(null);
+    setTenantModalMode('create');
+    setTenantModalOpen(true);
+  };
+
+  const handleEditTenant = (tenant: Tenant) => {
+    setSelectedTenant(tenant);
+    setTenantModalMode('edit');
+    setTenantModalOpen(true);
+  };
+
+  const handleSaveTenant = (tenantData: Partial<Tenant>) => {
+    if (tenantModalMode === 'create') {
+      setTenants([...tenants, tenantData as Tenant]);
+    } else {
+      setTenants(tenants.map(t => t.id === tenantData.id ? { ...t, ...tenantData } : t));
+    }
+  };
+
+  const handleDeleteTenant = (tenantId: string) => {
+    if (confirm('Tem certeza que deseja excluir este estabelecimento? Todos os usuários associados também serão removidos.')) {
+      setTenants(tenants.filter(t => t.id !== tenantId));
+      setUsers(users.filter(u => u.tenantId !== tenantId));
+    }
+  };
+
+  const handleToggleTenantStatus = (tenantId: string) => {
+    setTenants(tenants.map(t => 
+      t.id === tenantId ? { ...t, isActive: !t.isActive } : t
+    ));
+  };
+
+  // Filtros e cálculos
+  const filteredUsers = users.filter(user => {
+    const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         user.email.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesTenant = selectedTenantFilter === 'all' || user.tenantId === selectedTenantFilter;
+    return matchesSearch && matchesTenant;
+  });
 
   const getTenantName = (tenantId: string) => {
     return tenants.find(t => t.id === tenantId)?.name || 'N/A';
@@ -159,6 +219,7 @@ export default function SuperAdmin() {
   const totalRevenue = tenants.reduce((sum, tenant) => sum + (tenant.monthlyRevenue || 0), 0);
   const totalUsers = users.length;
   const activeUsers = users.filter(u => u.isActive).length;
+  const activeTenants = tenants.filter(t => t.isActive).length;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -172,7 +233,7 @@ export default function SuperAdmin() {
         <Tabs defaultValue="overview" className="space-y-6">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="overview">Visão Geral</TabsTrigger>
-            <TabsTrigger value="tenants">Pizzarias</TabsTrigger>
+            <TabsTrigger value="tenants">Estabelecimentos</TabsTrigger>
             <TabsTrigger value="users">Usuários</TabsTrigger>
           </TabsList>
 
@@ -182,13 +243,13 @@ export default function SuperAdmin() {
                 <CardHeader className="pb-2">
                   <CardTitle className="text-lg flex items-center gap-2">
                     <Building2 className="h-5 w-5" />
-                    Total de Pizzarias
+                    Estabelecimentos
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="text-3xl font-bold text-blue-600">{tenants.length}</div>
                   <p className="text-sm text-muted-foreground">
-                    {tenants.filter(t => t.isActive).length} ativas
+                    {activeTenants} ativos
                   </p>
                 </CardContent>
               </Card>
@@ -212,15 +273,15 @@ export default function SuperAdmin() {
                 <CardHeader className="pb-2">
                   <CardTitle className="text-lg flex items-center gap-2">
                     <Activity className="h-5 w-5" />
-                    Status Geral
+                    Taxa de Atividade
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="text-3xl font-bold text-purple-600">
-                    {Math.round((activeUsers / totalUsers) * 100)}%
+                    {totalUsers > 0 ? Math.round((activeUsers / totalUsers) * 100) : 0}%
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    Taxa de usuários ativos
+                    Usuários ativos
                   </p>
                 </CardContent>
               </Card>
@@ -242,90 +303,165 @@ export default function SuperAdmin() {
                 </CardContent>
               </Card>
             </div>
+
+            {/* Resumo por estabelecimento */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Resumo por Estabelecimento</CardTitle>
+                <CardDescription>
+                  Faturamento e estatísticas de cada estabelecimento
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {tenants.map((tenant) => (
+                    <div key={tenant.id} className="flex items-center justify-between p-4 border rounded-lg">
+                      <div className="flex items-center space-x-4">
+                        <div>
+                          <h4 className="font-semibold">{tenant.name}</h4>
+                          <p className="text-sm text-muted-foreground">{tenant.address}</p>
+                        </div>
+                        <Badge variant={tenant.isActive ? "default" : "destructive"}>
+                          {tenant.isActive ? "Ativo" : "Inativo"}
+                        </Badge>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-2xl font-bold text-green-600">
+                          R$ {(tenant.monthlyRevenue || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          {tenant.usersCount || 0} usuários
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="tenants">
-            <div className="space-y-4">
-              {tenants.map((tenant) => (
-                <Card key={tenant.id}>
-                  <CardHeader>
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <CardTitle className="text-xl">{tenant.name}</CardTitle>
-                        <CardDescription>
-                          Criada em {new Date(tenant.createdAt).toLocaleDateString('pt-BR')}
-                        </CardDescription>
-                      </div>
-                      <Badge variant={tenant.isActive ? "default" : "destructive"}>
-                        {tenant.isActive ? "Ativa" : "Inativa"}
-                      </Badge>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-                      <div>
-                        <h4 className="font-semibold mb-2">Informações Básicas</h4>
-                        <div className="text-sm space-y-1">
-                          <p><strong>Slug:</strong> {tenant.slug}</p>
-                          <p><strong>Telefone:</strong> {tenant.phone}</p>
-                          <p><strong>Endereço:</strong> {tenant.address}</p>
-                        </div>
-                      </div>
+            <div className="space-y-6">
+              <div className="flex justify-between items-center">
+                <h3 className="text-lg font-semibold">Gerenciar Estabelecimentos</h3>
+                <Button onClick={handleCreateTenant}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Novo Estabelecimento
+                </Button>
+              </div>
 
-                      <div>
-                        <h4 className="font-semibold mb-2">Estatísticas</h4>
-                        <div className="text-sm space-y-1">
-                          <p><strong>Usuários:</strong> {tenant.usersCount}</p>
-                          <p><strong>Receita Mensal:</strong> R$ {tenant.monthlyRevenue?.toFixed(2)}</p>
-                          <p><strong>Pedido Mínimo:</strong> R$ {tenant.settings.minimumOrder.toFixed(2)}</p>
+              <div className="space-y-4">
+                {tenants.map((tenant) => (
+                  <Card key={tenant.id}>
+                    <CardHeader>
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <CardTitle className="text-xl">{tenant.name}</CardTitle>
+                          <CardDescription>
+                            Criado em {new Date(tenant.createdAt).toLocaleDateString('pt-BR')}
+                          </CardDescription>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Badge variant={tenant.isActive ? "default" : "destructive"}>
+                            {tenant.isActive ? "Ativo" : "Inativo"}
+                          </Badge>
                         </div>
                       </div>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                        <div>
+                          <h4 className="font-semibold mb-2">Informações Básicas</h4>
+                          <div className="text-sm space-y-1">
+                            <p><strong>Slug:</strong> {tenant.slug}</p>
+                            <p><strong>Telefone:</strong> {tenant.phone}</p>
+                            <p><strong>Endereço:</strong> {tenant.address}</p>
+                          </div>
+                        </div>
 
-                      <div>
-                        <h4 className="font-semibold mb-2">Configurações</h4>
-                        <div className="text-sm space-y-1">
-                          <p><strong>Status:</strong> {tenant.settings.isOpen ? 'Aberta' : 'Fechada'}</p>
-                          <p><strong>Áreas de Entrega:</strong> {tenant.settings.deliveryAreas.length}</p>
-                          <p><strong>Formas de Pagamento:</strong> {tenant.settings.paymentMethods.length}</p>
+                        <div>
+                          <h4 className="font-semibold mb-2">Estatísticas</h4>
+                          <div className="text-sm space-y-1">
+                            <p><strong>Usuários:</strong> {tenant.usersCount}</p>
+                            <p><strong>Receita Mensal:</strong> R$ {tenant.monthlyRevenue?.toFixed(2)}</p>
+                            <p><strong>Pedido Mínimo:</strong> R$ {tenant.settings.minimumOrder.toFixed(2)}</p>
+                          </div>
                         </div>
-                      </div>
 
-                      <div>
-                        <h4 className="font-semibold mb-2">Ações</h4>
-                        <div className="space-y-2">
-                          <Button 
-                            variant={tenant.isActive ? "destructive" : "default"} 
-                            className="w-full" 
-                            size="sm"
-                          >
-                            {tenant.isActive ? "Desativar" : "Ativar"}
-                          </Button>
-                          <Button variant="outline" className="w-full" size="sm">
-                            Configurar
-                          </Button>
-                          <Button variant="outline" className="w-full" size="sm">
-                            Ver Relatórios
-                          </Button>
+                        <div>
+                          <h4 className="font-semibold mb-2">Configurações</h4>
+                          <div className="text-sm space-y-1">
+                            <p><strong>Status:</strong> {tenant.settings.isOpen ? 'Aberto' : 'Fechado'}</p>
+                            <p><strong>Áreas de Entrega:</strong> {tenant.settings.deliveryAreas.length}</p>
+                            <p><strong>Formas de Pagamento:</strong> {tenant.settings.paymentMethods.length}</p>
+                          </div>
+                        </div>
+
+                        <div>
+                          <h4 className="font-semibold mb-2">Ações</h4>
+                          <div className="space-y-2">
+                            <Button 
+                              variant={tenant.isActive ? "destructive" : "default"} 
+                              className="w-full" 
+                              size="sm"
+                              onClick={() => handleToggleTenantStatus(tenant.id)}
+                            >
+                              {tenant.isActive ? "Desativar" : "Ativar"}
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              className="w-full" 
+                              size="sm"
+                              onClick={() => handleEditTenant(tenant)}
+                            >
+                              <Edit className="h-4 w-4 mr-2" />
+                              Editar
+                            </Button>
+                            <Button 
+                              variant="destructive" 
+                              className="w-full" 
+                              size="sm"
+                              onClick={() => handleDeleteTenant(tenant.id)}
+                            >
+                              <Trash2 className="h-4 w-4 mr-2" />
+                              Excluir
+                            </Button>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
             </div>
           </TabsContent>
 
           <TabsContent value="users">
             <div className="space-y-6">
               <div className="flex justify-between items-center">
-                <div className="flex items-center space-x-2">
-                  <Search className="h-5 w-5 text-gray-400" />
-                  <Input
-                    placeholder="Buscar usuários..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-80"
-                  />
+                <div className="flex items-center space-x-4">
+                  <div className="flex items-center space-x-2">
+                    <Search className="h-5 w-5 text-gray-400" />
+                    <Input
+                      placeholder="Buscar usuários..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="w-80"
+                    />
+                  </div>
+                  <Select value={selectedTenantFilter} onValueChange={setSelectedTenantFilter}>
+                    <SelectTrigger className="w-60">
+                      <SelectValue placeholder="Filtrar por estabelecimento" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todos os estabelecimentos</SelectItem>
+                      {tenants.map((tenant) => (
+                        <SelectItem key={tenant.id} value={tenant.id}>
+                          {tenant.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <Button onClick={handleCreateUser}>
                   <Plus className="h-4 w-4 mr-2" />
@@ -347,7 +483,7 @@ export default function SuperAdmin() {
                         <TableHead>Nome</TableHead>
                         <TableHead>Email</TableHead>
                         <TableHead>Cargo</TableHead>
-                        <TableHead>Pizzaria</TableHead>
+                        <TableHead>Estabelecimento</TableHead>
                         <TableHead>Status</TableHead>
                         <TableHead>Último Login</TableHead>
                         <TableHead>Ações</TableHead>
@@ -409,7 +545,15 @@ export default function SuperAdmin() {
           onSave={handleSaveUser}
           user={selectedUser}
           tenants={tenants}
-          mode={modalMode}
+          mode={userModalMode}
+        />
+
+        <TenantModal
+          isOpen={tenantModalOpen}
+          onClose={() => setTenantModalOpen(false)}
+          onSave={handleSaveTenant}
+          tenant={selectedTenant}
+          mode={tenantModalMode}
         />
       </main>
     </div>
