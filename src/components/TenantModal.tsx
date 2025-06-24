@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -28,16 +28,41 @@ interface TenantFormData {
 export default function TenantModal({ isOpen, onClose, onSave, tenant, mode }: TenantModalProps) {
   const { register, handleSubmit, watch, reset, setValue } = useForm<TenantFormData>({
     defaultValues: {
-      name: tenant?.name || '',
-      slug: tenant?.slug || '',
-      phone: tenant?.phone || '',
-      address: tenant?.address || '',
-      isActive: tenant?.isActive ?? true,
-      minimumOrder: tenant?.settings?.minimumOrder || 25.00,
+      name: '',
+      slug: '',
+      phone: '',
+      address: '',
+      isActive: true,
+      minimumOrder: 25.00,
     }
   });
 
   const watchedIsActive = watch('isActive');
+
+  // Reset form when tenant changes or modal opens
+  useEffect(() => {
+    if (isOpen) {
+      if (tenant && mode === 'edit') {
+        reset({
+          name: tenant.name || '',
+          slug: tenant.slug || '',
+          phone: tenant.phone || '',
+          address: tenant.address || '',
+          isActive: tenant.isActive ?? true,
+          minimumOrder: tenant.settings?.minimumOrder || 25.00,
+        });
+      } else {
+        reset({
+          name: '',
+          slug: '',
+          phone: '',
+          address: '',
+          isActive: true,
+          minimumOrder: 25.00,
+        });
+      }
+    }
+  }, [isOpen, tenant, mode, reset]);
 
   const onSubmit = (data: TenantFormData) => {
     const tenantData: Partial<Tenant> = {

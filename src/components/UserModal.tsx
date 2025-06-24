@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -29,16 +29,39 @@ interface UserFormData {
 export default function UserModal({ isOpen, onClose, onSave, user, tenants, mode }: UserModalProps) {
   const { register, handleSubmit, watch, reset, setValue } = useForm<UserFormData>({
     defaultValues: {
-      name: user?.name || '',
-      email: user?.email || '',
-      role: user?.role === 'super_admin' ? 'admin' : user?.role || 'attendant',
-      tenantId: user?.tenantId || '',
-      isActive: user?.isActive ?? true,
+      name: '',
+      email: '',
+      role: 'attendant',
+      tenantId: '',
+      isActive: true,
     }
   });
 
   const watchedRole = watch('role');
   const watchedIsActive = watch('isActive');
+
+  // Reset form when user changes or modal opens
+  useEffect(() => {
+    if (isOpen) {
+      if (user && mode === 'edit') {
+        reset({
+          name: user.name || '',
+          email: user.email || '',
+          role: user.role === 'super_admin' ? 'admin' : user.role || 'attendant',
+          tenantId: user.tenantId || '',
+          isActive: user.isActive ?? true,
+        });
+      } else {
+        reset({
+          name: '',
+          email: '',
+          role: 'attendant',
+          tenantId: '',
+          isActive: true,
+        });
+      }
+    }
+  }, [isOpen, user, mode, reset]);
 
   const onSubmit = (data: UserFormData) => {
     const userData: Partial<User> = {
