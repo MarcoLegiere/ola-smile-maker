@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
+import { Checkbox } from '@/components/ui/checkbox';
 import { User, Tenant } from '@/types';
 import { useForm } from 'react-hook-form';
 
@@ -24,9 +25,13 @@ interface UserFormData {
   role: 'admin' | 'attendant';
   tenantId: string;
   isActive: boolean;
+  password: string;
+  changePassword: boolean;
 }
 
 export default function UserModal({ isOpen, onClose, onSave, user, tenants, mode }: UserModalProps) {
+  const [changePassword, setChangePassword] = useState(false);
+  
   const { register, handleSubmit, watch, reset, setValue } = useForm<UserFormData>({
     defaultValues: {
       name: '',
@@ -34,6 +39,8 @@ export default function UserModal({ isOpen, onClose, onSave, user, tenants, mode
       role: 'attendant',
       tenantId: '',
       isActive: true,
+      password: '',
+      changePassword: false,
     }
   });
 
@@ -50,7 +57,10 @@ export default function UserModal({ isOpen, onClose, onSave, user, tenants, mode
           role: user.role === 'super_admin' ? 'admin' : user.role || 'attendant',
           tenantId: user.tenantId || '',
           isActive: user.isActive ?? true,
+          password: '',
+          changePassword: false,
         });
+        setChangePassword(false);
       } else {
         reset({
           name: '',
@@ -58,7 +68,10 @@ export default function UserModal({ isOpen, onClose, onSave, user, tenants, mode
           role: 'attendant',
           tenantId: '',
           isActive: true,
+          password: '',
+          changePassword: false,
         });
+        setChangePassword(false);
       }
     }
   }, [isOpen, user, mode, reset]);
@@ -70,6 +83,11 @@ export default function UserModal({ isOpen, onClose, onSave, user, tenants, mode
       createdAt: user?.createdAt || new Date().toISOString(),
     };
 
+    // Se estamos editando e não marcamos para alterar senha, removemos o campo password
+    if (mode === 'edit' && !changePassword) {
+      delete userData.password;
+    }
+
     onSave(userData);
     reset();
     onClose();
@@ -77,6 +95,7 @@ export default function UserModal({ isOpen, onClose, onSave, user, tenants, mode
 
   const handleClose = () => {
     reset();
+    setChangePassword(false);
     onClose();
   };
 
@@ -146,6 +165,36 @@ export default function UserModal({ isOpen, onClose, onSave, user, tenants, mode
                 </SelectContent>
               </Select>
             </div>
+          </div>
+
+          {/* Campo de senha */}
+          <div className="space-y-3">
+            {mode === 'edit' && (
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="changePassword"
+                  checked={changePassword}
+                  onCheckedChange={(checked) => setChangePassword(checked as boolean)}
+                />
+                <Label htmlFor="changePassword">Alterar senha</Label>
+              </div>
+            )}
+
+            {(mode === 'create' || changePassword) && (
+              <div className="space-y-2">
+                <Label htmlFor="password">
+                  {mode === 'create' ? 'Senha' : 'Nova Senha'}
+                </Label>
+                <Input
+                  id="password"
+                  type="password"
+                  {...register('password', { 
+                    required: mode === 'create' || changePassword 
+                  })}
+                  placeholder="Digite a senha"
+                />
+              </div>
+            )}
           </div>
 
           <div className="flex items-center space-x-2">
