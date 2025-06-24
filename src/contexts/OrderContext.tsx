@@ -54,6 +54,7 @@ export const OrderProvider: React.FC<OrderProviderProps> = ({ children }) => {
       paymentMethod: 'PIX',
       deliveryAddress: 'Rua das Flores, 123',
       deliveryFee: 5.00,
+      source: 'manual',
       createdAt: new Date().toISOString(),
     },
     {
@@ -74,6 +75,7 @@ export const OrderProvider: React.FC<OrderProviderProps> = ({ children }) => {
       paymentMethod: 'Cartão de Crédito',
       deliveryAddress: 'Av. Principal, 456',
       deliveryFee: 5.00,
+      source: 'online',
       createdAt: new Date(Date.now() - 3600000).toISOString(),
     },
     {
@@ -94,6 +96,7 @@ export const OrderProvider: React.FC<OrderProviderProps> = ({ children }) => {
       paymentMethod: 'Dinheiro',
       deliveryAddress: 'Rua das Flores, 123',
       deliveryFee: 5.00,
+      source: 'manual',
       createdAt: new Date(Date.now() - 7200000).toISOString(),
     },
   ]);

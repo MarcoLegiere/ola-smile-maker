@@ -1,16 +1,11 @@
 
 import Navbar from '@/components/Navbar';
-import NewOrderModal from '@/components/NewOrderModal';
 import OrderCard from '@/components/OrderCard';
 import OrderStats from '@/components/OrderStats';
 import { useOrders } from '@/contexts/OrderContext';
 
 export default function Orders() {
-  const { orders, updateOrderStatus, addOrder } = useOrders();
-
-  const handleOrderCreated = (newOrder: any) => {
-    addOrder(newOrder);
-  };
+  const { orders, updateOrderStatus } = useOrders();
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -19,7 +14,6 @@ export default function Orders() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex justify-between items-center mb-8">
           <h2 className="text-2xl font-bold text-gray-900">Gerenciar Pedidos</h2>
-          <NewOrderModal onOrderCreated={handleOrderCreated} ordersCount={orders.length} />
         </div>
 
         <OrderStats />

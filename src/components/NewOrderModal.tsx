@@ -228,6 +228,7 @@ export default function NewOrderModal({ onOrderCreated, ordersCount }: NewOrderM
       paymentMethod: getPaymentMethodLabel(paymentMethod),
       deliveryAddress: customerInfo.address,
       deliveryFee: 5.00,
+      source: 'manual',
       createdAt: new Date().toISOString(),
     };
 
