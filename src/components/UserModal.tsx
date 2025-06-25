@@ -13,7 +13,7 @@ import { useForm } from 'react-hook-form';
 interface UserModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (user: Partial<User>) => void;
+  onSave: (user: Partial<User> & { password?: string }) => void;
   user?: User | null;
   tenants: Tenant[];
   mode: 'create' | 'edit';
@@ -77,15 +77,19 @@ export default function UserModal({ isOpen, onClose, onSave, user, tenants, mode
   }, [isOpen, user, mode, reset]);
 
   const onSubmit = (data: UserFormData) => {
-    const userData: Partial<User> = {
-      ...data,
+    const userData: Partial<User> & { password?: string } = {
+      name: data.name,
+      email: data.email,
+      role: data.role,
+      tenantId: data.tenantId,
+      isActive: data.isActive,
       id: user?.id || `user-${Date.now()}`,
       createdAt: user?.createdAt || new Date().toISOString(),
     };
 
-    // Se estamos editando e não marcamos para alterar senha, removemos o campo password
-    if (mode === 'edit' && !changePassword) {
-      delete userData.password;
+    // Adicionar senha apenas se necessário
+    if (mode === 'create' || (mode === 'edit' && changePassword)) {
+      userData.password = data.password;
     }
 
     onSave(userData);
