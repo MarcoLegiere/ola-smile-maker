@@ -1,6 +1,7 @@
 
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { Order, Customer } from '@/types';
+import { useTenant } from '@/components/ProtectedRoute';
 
 interface OrderContextType {
   orders: Order[];
@@ -27,118 +28,139 @@ interface OrderProviderProps {
   children: ReactNode;
 }
 
-export const OrderProvider: React.FC<OrderProviderProps> = ({ children }) => {
-  const [orders, setOrders] = useState<Order[]>([
-    {
-      id: '1',
-      tenantId: 'tenant-1',
-      customerId: '1',
-      items: [
-        {
-          productId: '1',
-          productName: 'Pizza Margherita',
-          quantity: 1,
-          unitPrice: 35.90,
-          total: 35.90,
-        },
-        {
-          productId: '3',
-          productName: 'Coca-Cola 2L',
-          quantity: 2,
-          unitPrice: 8.90,
-          total: 17.80,
-        },
-      ],
-      total: 58.70,
-      status: 'preparing',
-      paymentMethod: 'PIX',
-      deliveryAddress: 'Rua das Flores, 123',
-      deliveryFee: 5.00,
-      source: 'manual',
-      createdAt: new Date().toISOString(),
-    },
-    {
-      id: '2',
-      tenantId: 'tenant-1',
-      customerId: '2',
-      items: [
-        {
-          productId: '2',
-          productName: 'Pizza Pepperoni',
-          quantity: 2,
-          unitPrice: 42.90,
-          total: 85.80,
-        },
-      ],
-      total: 90.80,
-      status: 'out_for_delivery',
-      paymentMethod: 'Cartão de Crédito',
-      deliveryAddress: 'Av. Principal, 456',
-      deliveryFee: 5.00,
-      source: 'online',
-      createdAt: new Date(Date.now() - 3600000).toISOString(),
-    },
-    {
-      id: '3',
-      tenantId: 'tenant-1',
-      customerId: '1',
-      items: [
-        {
-          productId: '1',
-          productName: 'Pizza Margherita',
-          quantity: 1,
-          unitPrice: 35.90,
-          total: 35.90,
-        },
-      ],
-      total: 40.90,
-      status: 'delivered',
-      paymentMethod: 'Dinheiro',
-      deliveryAddress: 'Rua das Flores, 123',
-      deliveryFee: 5.00,
-      source: 'manual',
-      createdAt: new Date(Date.now() - 7200000).toISOString(),
-    },
-  ]);
+const allOrders: Order[] = [
+  {
+    id: '1',
+    tenantId: 'tenant-1',
+    customerId: '1',
+    items: [
+      {
+        productId: '1',
+        productName: 'Pizza Margherita',
+        quantity: 1,
+        unitPrice: 35.90,
+        total: 35.90,
+      },
+      {
+        productId: '3',
+        productName: 'Coca-Cola 2L',
+        quantity: 2,
+        unitPrice: 8.90,
+        total: 17.80,
+      },
+    ],
+    total: 58.70,
+    status: 'preparing',
+    paymentMethod: 'PIX',
+    deliveryAddress: 'Rua das Flores, 123',
+    deliveryFee: 5.00,
+    source: 'manual',
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: '2',
+    tenantId: 'tenant-1',
+    customerId: '2',
+    items: [
+      {
+        productId: '2',
+        productName: 'Pizza Pepperoni',
+        quantity: 2,
+        unitPrice: 42.90,
+        total: 85.80,
+      },
+    ],
+    total: 90.80,
+    status: 'out_for_delivery',
+    paymentMethod: 'Cartão de Crédito',
+    deliveryAddress: 'Av. Principal, 456',
+    deliveryFee: 5.00,
+    source: 'online',
+    createdAt: new Date(Date.now() - 3600000).toISOString(),
+  },
+  {
+    id: '3',
+    tenantId: 'tenant-2',
+    customerId: '3',
+    items: [
+      {
+        productId: '1',
+        productName: 'Pizza Margherita',
+        quantity: 1,
+        unitPrice: 35.90,
+        total: 35.90,
+      },
+    ],
+    total: 40.90,
+    status: 'delivered',
+    paymentMethod: 'Dinheiro',
+    deliveryAddress: 'Rua das Palmeiras, 789',
+    deliveryFee: 5.00,
+    source: 'manual',
+    createdAt: new Date(Date.now() - 7200000).toISOString(),
+  },
+];
 
-  const [customers, setCustomers] = useState<Customer[]>([
-    {
-      id: '1',
-      tenantId: 'tenant-1',
-      name: 'João Silva',
-      phone: '(11) 99999-9999',
-      email: 'joao@email.com',
-      addresses: [
-        {
-          id: '1',
-          street: 'Rua das Flores, 123',
-          neighborhood: 'Centro',
-          city: 'São Paulo',
-          zipCode: '01234-567',
-          isDefault: true,
-        },
-      ],
-      createdAt: new Date().toISOString(),
-    },
-    {
-      id: '2',
-      tenantId: 'tenant-1',
-      name: 'Maria Santos',
-      phone: '(11) 88888-8888',
-      email: 'maria@email.com',
-      addresses: [
-        {
-          id: '2',
-          street: 'Av. Principal, 456',
-          neighborhood: 'Vila Nova',
-          city: 'São Paulo',
-          zipCode: '01234-890',
-          isDefault: true,
-        },
-      ],
-      createdAt: new Date(Date.now() - 86400000).toISOString(),
-    },
-  ]);
+const allCustomers: Customer[] = [
+  {
+    id: '1',
+    tenantId: 'tenant-1',
+    name: 'João Silva',
+    phone: '(11) 99999-9999',
+    email: 'joao@email.com',
+    addresses: [
+      {
+        id: '1',
+        street: 'Rua das Flores, 123',
+        neighborhood: 'Centro',
+        city: 'São Paulo',
+        zipCode: '01234-567',
+        isDefault: true,
+      },
+    ],
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: '2',
+    tenantId: 'tenant-1',
+    name: 'Maria Santos',
+    phone: '(11) 88888-8888',
+    email: 'maria@email.com',
+    addresses: [
+      {
+        id: '2',
+        street: 'Av. Principal, 456',
+        neighborhood: 'Vila Nova',
+        city: 'São Paulo',
+        zipCode: '01234-890',
+        isDefault: true,
+      },
+    ],
+    createdAt: new Date(Date.now() - 86400000).toISOString(),
+  },
+  {
+    id: '3',
+    tenantId: 'tenant-2',
+    name: 'Carlos Oliveira',
+    phone: '(21) 77777-7777',
+    email: 'carlos@email.com',
+    addresses: [
+      {
+        id: '3',
+        street: 'Rua das Palmeiras, 789',
+        neighborhood: 'Copacabana',
+        city: 'Rio de Janeiro',
+        zipCode: '12345-678',
+        isDefault: true,
+      },
+    ],
+    createdAt: new Date(Date.now() - 172800000).toISOString(),
+  },
+];
+
+export const OrderProvider: React.FC<OrderProviderProps> = ({ children }) => {
+  const [orders, setOrders] = useState<Order[]>(allOrders);
+  const [customers, setCustomers] = useState<Customer[]>(allCustomers);
 
   const addOrder = (order: Order) => {
     setOrders(prev => [order, ...prev]);

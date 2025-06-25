@@ -2,10 +2,10 @@
 import Navbar from '@/components/Navbar';
 import OrderCard from '@/components/OrderCard';
 import OrderStats from '@/components/OrderStats';
-import { useOrders } from '@/contexts/OrderContext';
+import { useTenantData } from '@/hooks/useTenantData';
 
 export default function Orders() {
-  const { orders, updateOrderStatus } = useOrders();
+  const { orders, updateOrderStatus } = useTenantData();
 
   return (
     <div className="min-h-screen bg-gray-50">

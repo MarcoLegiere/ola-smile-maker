@@ -1,10 +1,10 @@
 
 import { Card, CardContent } from '@/components/ui/card';
-import { useOrders } from '@/contexts/OrderContext';
+import { useTenantData } from '@/hooks/useTenantData';
 import { useOrderStats } from '@/hooks/useOrderStats';
 
 export default function OrderStats() {
-  const { orders } = useOrders();
+  const { orders } = useTenantData();
   const stats = useOrderStats(orders);
 
   return (

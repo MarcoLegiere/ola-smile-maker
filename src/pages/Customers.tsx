@@ -4,10 +4,10 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import Navbar from '@/components/Navbar';
 import CustomerModal from '@/components/CustomerModal';
-import { useOrders } from '@/contexts/OrderContext';
+import { useTenantData } from '@/hooks/useTenantData';
 
 export default function Customers() {
-  const { customers, updateCustomer, addCustomer, orders } = useOrders();
+  const { customers, orders, updateCustomer, addCustomer } = useTenantData();
 
   const handleCustomerSaved = (customer: any) => {
     const existingCustomerIndex = customers.findIndex(c => c.id === customer.id);

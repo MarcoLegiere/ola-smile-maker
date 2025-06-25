@@ -1,11 +1,26 @@
 
 import { useAuth } from '@/contexts/AuthContext';
 import { Navigate } from 'react-router-dom';
+import { createContext, useContext } from 'react';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
   requiredRole?: 'super_admin' | 'admin' | 'attendant';
 }
+
+interface TenantContextType {
+  tenantId: string | null;
+}
+
+const TenantContext = createContext<TenantContextType>({ tenantId: null });
+
+export const useTenant = () => {
+  const context = useContext(TenantContext);
+  if (!context) {
+    throw new Error('useTenant must be used within a ProtectedRoute');
+  }
+  return context;
+};
 
 export const ProtectedRoute = ({ children, requiredRole }: ProtectedRouteProps) => {
   const { user, isLoading } = useAuth();
@@ -24,7 +39,11 @@ export const ProtectedRoute = ({ children, requiredRole }: ProtectedRouteProps) 
 
   // Super admin tem acesso a tudo
   if (user.role === 'super_admin') {
-    return <>{children}</>;
+    return (
+      <TenantContext.Provider value={{ tenantId: null }}>
+        {children}
+      </TenantContext.Provider>
+    );
   }
 
   // Verifica se o usuário tem o papel necessário
@@ -42,5 +61,9 @@ export const ProtectedRoute = ({ children, requiredRole }: ProtectedRouteProps) 
     return <Navigate to="/unauthorized" replace />;
   }
 
-  return <>{children}</>;
+  return (
+    <TenantContext.Provider value={{ tenantId: user.tenantId || null }}>
+      {children}
+    </TenantContext.Provider>
+  );
 };

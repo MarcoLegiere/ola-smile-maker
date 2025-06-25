@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -11,7 +10,7 @@ import { Plus, Minus, Printer, ShoppingCart, User, CreditCard } from 'lucide-rea
 import Navbar from '@/components/Navbar';
 import CustomerSearch from '@/components/CustomerSearch';
 import { Customer, Order } from '@/types';
-import { useOrders } from '@/contexts/OrderContext';
+import { useTenantData } from '@/hooks/useTenantData';
 
 interface OrderItem {
   productId: string;
@@ -22,7 +21,7 @@ interface OrderItem {
 
 export default function NewOrder() {
   const navigate = useNavigate();
-  const { customers, addOrder, orders } = useOrders();
+  const { customers, addOrder, orders, tenantId } = useTenantData();
   const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
   const [customerInfo, setCustomerInfo] = useState({
     name: '',
@@ -212,7 +211,7 @@ export default function NewOrder() {
 
     const newOrder: Order = {
       id: (orders.length + 1).toString(),
-      tenantId: 'tenant-1',
+      tenantId: tenantId || 'tenant-1', // Usar o tenantId do usuário logado
       customerId: selectedCustomer?.id || 'new-customer',
       items: orderItems.map(item => ({
         productId: item.productId,
