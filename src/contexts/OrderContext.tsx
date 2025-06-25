@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState } from 'react';
 import { Order, Customer, Tenant } from '@/types';
 
@@ -8,6 +9,7 @@ interface OrderContextType {
   addOrder: (order: Order) => void;
   updateOrderStatus: (orderId: string, status: Order['status']) => void;
   addCustomer: (customer: Customer) => void;
+  updateCustomer: (customer: Customer) => void;
   updateTenant: (updatedTenant: Tenant) => void;
 }
 

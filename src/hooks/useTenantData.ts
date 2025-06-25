@@ -5,7 +5,7 @@ import { useTenant } from '@/components/ProtectedRoute';
 
 export const useTenantData = () => {
   const { tenantId } = useTenant();
-  const { orders: allOrders, customers: allCustomers, tenants, ...rest } = useOrders();
+  const { orders: allOrders, customers: allCustomers, tenants, updateCustomer, ...rest } = useOrders();
 
   const filteredData = useMemo(() => {
     // Super admin (tenantId null) vê todos os dados
@@ -28,6 +28,7 @@ export const useTenantData = () => {
   return {
     ...filteredData,
     ...rest,
+    updateCustomer,
     tenantId,
   };
 };

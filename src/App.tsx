@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from '@/components/ui/sonner';
 import { AuthProvider } from '@/contexts/AuthContext';
-import { OrderProvider } from '@/contexts/OrderContext';
+import OrderProvider from '@/contexts/OrderContext';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 
 // Pages
