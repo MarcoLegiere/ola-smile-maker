@@ -7,6 +7,9 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
   isLoading: boolean;
+  addUser: (user: User, password: string) => void;
+  updateUser: (user: User) => void;
+  removeUser: (userId: string) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -20,7 +23,7 @@ export const useAuth = () => {
 };
 
 // Usuários mockados para demonstração
-const mockUsers: User[] = [
+const initialUsers: User[] = [
   {
     id: '1',
     email: 'admin@pizza.com',
@@ -72,33 +75,81 @@ const mockUsers: User[] = [
   },
 ];
 
+// Senhas dos usuários (em produção, isso seria criptografado)
+const initialPasswords: { [key: string]: string } = {
+  'admin@pizza.com': 'admin123',
+  'bellavista@admin.com': 'admin123',
+  'bellavista@atendente.com': 'admin123',
+  'express@admin.com': 'admin123',
+  'express@atendente.com': 'admin123',
+};
+
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [users, setUsers] = useState<User[]>(() => {
+    const stored = localStorage.getItem('systemUsers');
+    return stored ? JSON.parse(stored) : initialUsers;
+  });
+  const [passwords, setPasswords] = useState<{ [key: string]: string }>(() => {
+    const stored = localStorage.getItem('systemPasswords');
+    return stored ? JSON.parse(stored) : initialPasswords;
+  });
+
+  // Salvar usuários e senhas no localStorage
+  useEffect(() => {
+    localStorage.setItem('systemUsers', JSON.stringify(users));
+  }, [users]);
+
+  useEffect(() => {
+    localStorage.setItem('systemPasswords', JSON.stringify(passwords));
+  }, [passwords]);
 
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
-      setUser(JSON.parse(storedUser));
+      const parsedUser = JSON.parse(storedUser);
+      // Verificar se o usuário ainda existe e está ativo
+      const currentUser = users.find(u => u.id === parsedUser.id);
+      if (currentUser && currentUser.isActive) {
+        setUser(currentUser);
+      } else {
+        localStorage.removeItem('user');
+      }
     }
     setIsLoading(false);
-  }, []);
+  }, [users]);
 
   const login = async (email: string, password: string) => {
-    // Simulação de login com múltiplos usuários
-    const foundUser = mockUsers.find(u => u.email === email);
+    // Encontrar usuário pelo email
+    const foundUser = users.find(u => u.email === email);
     
-    if (foundUser && password === 'admin123') {
-      // Atualizar último login
-      const updatedUser = { 
-        ...foundUser, 
-        lastLogin: new Date().toISOString() 
-      };
-      setUser(updatedUser);
-      localStorage.setItem('user', JSON.stringify(updatedUser));
-    } else {
-      throw new Error('Credenciais inválidas');
+    if (!foundUser) {
+      throw new Error('Usuário não encontrado');
     }
+
+    if (!foundUser.isActive) {
+      throw new Error('Usuário inativo. Entre em contato com o administrador.');
+    }
+
+    // Verificar senha
+    if (passwords[email] !== password) {
+      throw new Error('Senha incorreta');
+    }
+
+    // Atualizar último login
+    const updatedUser = { 
+      ...foundUser, 
+      lastLogin: new Date().toISOString() 
+    };
+
+    // Atualizar na lista de usuários
+    setUsers(prevUsers => 
+      prevUsers.map(u => u.id === foundUser.id ? updatedUser : u)
+    );
+
+    setUser(updatedUser);
+    localStorage.setItem('user', JSON.stringify(updatedUser));
   };
 
   const logout = () => {
@@ -106,8 +157,53 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     localStorage.removeItem('user');
   };
 
+  const addUser = (newUser: User, password: string) => {
+    setUsers(prevUsers => [...prevUsers, newUser]);
+    setPasswords(prevPasswords => ({
+      ...prevPasswords,
+      [newUser.email]: password
+    }));
+  };
+
+  const updateUser = (updatedUser: User) => {
+    setUsers(prevUsers => 
+      prevUsers.map(u => u.id === updatedUser.id ? updatedUser : u)
+    );
+    
+    // Se o usuário logado foi atualizado, atualizar também o estado atual
+    if (user && user.id === updatedUser.id) {
+      setUser(updatedUser);
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+    }
+  };
+
+  const removeUser = (userId: string) => {
+    const userToRemove = users.find(u => u.id === userId);
+    if (userToRemove) {
+      setUsers(prevUsers => prevUsers.filter(u => u.id !== userId));
+      setPasswords(prevPasswords => {
+        const newPasswords = { ...prevPasswords };
+        delete newPasswords[userToRemove.email];
+        return newPasswords;
+      });
+      
+      // Se o usuário removido está logado, fazer logout
+      if (user && user.id === userId) {
+        logout();
+      }
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, login, logout, isLoading }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      login, 
+      logout, 
+      isLoading, 
+      addUser, 
+      updateUser, 
+      removeUser 
+    }}>
       {children}
     </AuthContext.Provider>
   );

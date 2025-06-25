@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -12,8 +11,11 @@ import Navbar from '@/components/Navbar';
 import UserModal from '@/components/UserModal';
 import TenantModal from '@/components/TenantModal';
 import { Users, Building2, DollarSign, Activity, Search, Plus, Edit, Trash2 } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function SuperAdmin() {
+  const { addUser, updateUser, removeUser } = useAuth();
+
   const [tenants, setTenants] = useState<Tenant[]>([
     {
       id: 'tenant-1',
@@ -139,9 +141,24 @@ export default function SuperAdmin() {
     setUserModalOpen(true);
   };
 
-  const handleSaveUser = (userData: Partial<User>) => {
+  const handleSaveUser = (userData: Partial<User> & { password?: string }) => {
     if (userModalMode === 'create') {
-      setUsers([...users, userData as User]);
+      const newUser: User = {
+        id: userData.id || `user-${Date.now()}`,
+        name: userData.name || '',
+        email: userData.email || '',
+        role: userData.role || 'attendant',
+        tenantId: userData.tenantId,
+        isActive: userData.isActive ?? true,
+        createdAt: userData.createdAt || new Date().toISOString(),
+      };
+
+      // Adicionar usuário ao contexto de autenticação
+      addUser(newUser, userData.password || 'admin123');
+      
+      // Adicionar à lista local
+      setUsers([...users, newUser]);
+      
       // Atualizar contagem de usuários do tenant
       if (userData.tenantId) {
         setTenants(tenants.map(t => 
@@ -151,14 +168,35 @@ export default function SuperAdmin() {
         ));
       }
     } else {
-      setUsers(users.map(u => u.id === userData.id ? { ...u, ...userData } : u));
+      const updatedUser: User = {
+        id: userData.id || '',
+        name: userData.name || '',
+        email: userData.email || '',
+        role: userData.role || 'attendant',
+        tenantId: userData.tenantId,
+        isActive: userData.isActive ?? true,
+        createdAt: userData.createdAt || new Date().toISOString(),
+        lastLogin: users.find(u => u.id === userData.id)?.lastLogin,
+      };
+
+      // Atualizar usuário no contexto de autenticação
+      updateUser(updatedUser);
+      
+      // Atualizar na lista local
+      setUsers(users.map(u => u.id === userData.id ? updatedUser : u));
     }
   };
 
   const handleDeleteUser = (userId: string) => {
     if (confirm('Tem certeza que deseja excluir este usuário?')) {
       const userToDelete = users.find(u => u.id === userId);
+      
+      // Remover do contexto de autenticação
+      removeUser(userId);
+      
+      // Remover da lista local
       setUsers(users.filter(u => u.id !== userId));
+      
       // Atualizar contagem de usuários do tenant
       if (userToDelete?.tenantId) {
         setTenants(tenants.map(t => 

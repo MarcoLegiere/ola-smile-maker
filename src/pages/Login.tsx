@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Navigate, useNavigate } from 'react-router-dom';
@@ -84,7 +83,12 @@ export default function Login() {
             <p className="text-sm font-medium text-blue-800 mb-2">Credenciais de Teste:</p>
             <div className="text-xs text-blue-700 space-y-1">
               <p><strong>Super Admin:</strong> admin@pizza.com / admin123</p>
-              <p><strong>Pizzaria:</strong> pizzaria@teste.com / pizza123</p>
+              <p><strong>Admin Bella Vista:</strong> bellavista@admin.com / admin123</p>
+              <p><strong>Atendente Bella Vista:</strong> bellavista@atendente.com / admin123</p>
+              <p><strong>Admin Pizza Express:</strong> express@admin.com / admin123</p>
+            </div>
+            <div className="mt-2 text-xs text-blue-600">
+              <p>💡 Novos usuários criados usam a senha padrão: <strong>admin123</strong></p>
             </div>
           </div>
         </CardContent>
