@@ -21,7 +21,7 @@ interface OrderItem {
 
 export default function NewOrder() {
   const navigate = useNavigate();
-  const { customers, addOrder, orders, tenantId } = useTenantData();
+  const { customers, addOrder, orders, tenantId, currentTenant } = useTenantData();
   const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
   const [customerInfo, setCustomerInfo] = useState({
     name: '',
@@ -110,6 +110,9 @@ export default function NewOrder() {
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
 
+    const storeName = currentTenant?.name || 'ESTABELECIMENTO';
+    const storePhone = currentTenant?.phone || '(11) 99999-9999';
+
     const printContent = `
       <!DOCTYPE html>
       <html>
@@ -132,8 +135,8 @@ export default function NewOrder() {
       </head>
       <body>
         <div class="header">
-          <h2>PIZZARIA DO JOÃO</h2>
-          <p>Tel: (11) 99999-9999</p>
+          <h2>${storeName.toUpperCase()}</h2>
+          <p>Tel: ${storePhone}</p>
           <p>CUPOM NAO FISCAL</p>
           <p>Pedido #${order.id}</p>
           <p>${new Date(order.createdAt).toLocaleString('pt-BR')}</p>
