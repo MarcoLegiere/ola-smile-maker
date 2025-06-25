@@ -11,7 +11,7 @@ import Navbar from '@/components/Navbar';
 import UserModal from '@/components/UserModal';
 import TenantModal from '@/components/TenantModal';
 import { Users, Building2, DollarSign, Activity, Search, Plus, Edit, Trash2 } from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function SuperAdmin() {
   const { addUser, updateUser, removeUser } = useAuth();
