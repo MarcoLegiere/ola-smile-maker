@@ -20,7 +20,7 @@ export default function NotFound() {
             Verifique o endereço ou volte para o início.
           </p>
           <div className="space-y-2">
-            <Button onClick={() => navigate('/dashboard')} className="w-full">
+            <Button onClick={() => navigate('/')} className="w-full">
               Ir para Dashboard
             </Button>
             <Button onClick={() => navigate('/')} variant="outline" className="w-full">

@@ -151,6 +151,12 @@ const OrderProvider = ({ children }: { children: React.ReactNode }) => {
     setCustomers([...customers, customer]);
   };
 
+  const updateCustomer = (customer: Customer) => {
+    setCustomers(customers.map(c => 
+      c.id === customer.id ? customer : c
+    ));
+  };
+
   const updateTenant = (updatedTenant: Tenant) => {
     setTenants(tenants.map(tenant => 
       tenant.id === updatedTenant.id ? updatedTenant : tenant
@@ -165,6 +171,7 @@ const OrderProvider = ({ children }: { children: React.ReactNode }) => {
       addOrder,
       updateOrderStatus,
       addCustomer,
+      updateCustomer,
       updateTenant,
     }}>
       {children}
