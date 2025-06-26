@@ -31,7 +31,7 @@ export default function Navbar() {
   const isActive = (path: string) => location.pathname === path;
 
   const navigationItems = [
-    { name: 'Dashboard', href: '/', icon: Home },
+    { name: 'Dashboard', href: '/dashboard', icon: Home },
     { name: 'Pedidos', href: '/orders', icon: ShoppingCart },
     { name: 'Novo Pedido', href: '/new-order', icon: ShoppingCart },
     { name: 'Clientes', href: '/customers', icon: Users },

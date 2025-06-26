@@ -9,6 +9,7 @@ import { ProtectedRoute } from '@/components/ProtectedRoute';
 // Pages
 import Index from '@/pages/Index';
 import Login from '@/pages/Login';
+import Dashboard from '@/pages/Dashboard';
 import Orders from '@/pages/Orders';
 import NewOrder from '@/pages/NewOrder';
 import Customers from '@/pages/Customers';
@@ -33,9 +34,11 @@ function App() {
                 <Route path="/login" element={<Login />} />
                 <Route path="/unauthorized" element={<Unauthorized />} />
                 
-                <Route path="/" element={
+                <Route path="/" element={<Index />} />
+                
+                <Route path="/dashboard" element={
                   <ProtectedRoute>
-                    <Index />
+                    <Dashboard />
                   </ProtectedRoute>
                 } />
                 
